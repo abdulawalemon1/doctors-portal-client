@@ -6,10 +6,11 @@ import Info from './Info/Info';
 import MakeAppointment from './MakeAppointment/MakeAppointment';
 import Services from './Services/Services';
 import Testimonials from './Testimonials/Testimonials';
+import Footer from '../Shared/Footer/Footer';
 
 const Home = () => {
     return (
-        <div className='px-12'>
+        <div className=''>
             <Banner></Banner>
             <Info></Info>
             <Services></Services>
@@ -17,6 +18,7 @@ const Home = () => {
             <MakeAppointment></MakeAppointment>
             <Testimonials></Testimonials>
             <ContactForm></ContactForm>
+            <Footer></Footer>
         </div>
     );
 };
