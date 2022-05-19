@@ -1,50 +1,50 @@
-import React, { useEffect } from 'react';
-import { useSignInWithGoogle } from 'react-firebase-hooks/auth';
+import React from 'react';
+import { useSignInWithGoogle, useUpdateProfile } from 'react-firebase-hooks/auth';
 import auth from '../../.firebase.init';
 import { useForm } from "react-hook-form";
-import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
+import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
 import Loading from '../Shared/Loading';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+const SignUp = () => {
 
 
-
-const Login = () => {
     const [signInWithGoogle, guser, gloading, gerror] = useSignInWithGoogle(auth);
     const [
-        signInWithEmailAndPassword,
+        createUserWithEmailAndPassword,
         user,
         loading,
         error,
-    ] = useSignInWithEmailAndPassword(auth);
+    ] = useCreateUserWithEmailAndPassword(auth);
+
+    const [updateProfile, updating, updateError] = useUpdateProfile(auth);
 
     const { register, formState: { errors }, handleSubmit } = useForm();
 
-    const onSubmit = data => {
-        signInWithEmailAndPassword(data.email, data.password)
+    const navigate = useNavigate();
+
+    const onSubmit = async data => {
+        await createUserWithEmailAndPassword(data.email, data.password);
+        await updateProfile({ displayName: data.name });
+        console.log('Updated done');
+        navigate('/appointment');
+
+
     }
 
     let signInErrorMessage;
-    const navigate = useNavigate();
-    const location = useLocation();
-    let from = location.state?.from?.pathname || "/";
 
-    useEffect(() => {
-        if (guser || user) {
-            navigate(from, { replace: true })
-            console.log(guser);
-        }
-    }, [user, guser, from, navigate])
 
-    if (error || gerror) {
-        signInErrorMessage = <p className='text-red-500'>{error?.message || gerror?.message}</p>
+    if (error || gerror || updateError) {
+        signInErrorMessage = <p className='text-red-500'>{error?.message || gerror?.message || updateError?.message}</p>
     }
-    if (loading || gloading) {
+    if (loading || gloading || updating) {
         return <Loading></Loading>
     }
     if (guser || user) {
-        navigate(from, { replace: true })
         console.log(guser);
     }
+
 
     return (
         <div className="hero min-h-screen ">
@@ -52,7 +52,30 @@ const Login = () => {
 
                 <div className="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
                     <form onSubmit={handleSubmit(onSubmit)} className="card-body">
-                        <h1 className='text-center text-2xl font-bold'>Login</h1>
+                        <h1 className='text-center text-2xl font-bold'>Sign Up</h1>
+
+
+                        <div class="form-control w-full max-w-xs">
+                            <label class="label">
+                                <span class="label-text">Name</span>
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Your Name"
+                                class="input input-bordered w-full max-w-xs"
+
+                                {...register("name", {
+                                    required: {
+                                        value: true,
+                                        message: 'Name is required'
+                                    }
+                                })}
+                            />
+                            <label class="label">
+                                {errors.name?.type === 'required' && <span className="label-text-alt text-red-500">{errors.name.message}</span>}
+
+                            </label>
+                        </div>
 
 
                         <div class="form-control w-full max-w-xs">
@@ -108,10 +131,16 @@ const Login = () => {
 
                             </label>
                         </div>
+
+
                         {signInErrorMessage}
-                        <input className='btn w-full max-w-xs text-white' value='Login' type="submit" />
-                        <p><small>New to Doctors Portal? <Link className='text-primary' to="/signup">Create New Account</Link></small></p>
+
+                        <input className='btn w-full max-w-xs text-white' value='SignUp' type="submit" />
+
+                        <p><small>Already have an account? <Link className='text-primary' to="/login">Please Login</Link></small></p>
+
                         <div className="divider">OR</div>
+
                         <button
                             onClick={() => signInWithGoogle()}
                             className='btn btn-outline'>Continue with Google</button>
@@ -122,4 +151,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default SignUp;
