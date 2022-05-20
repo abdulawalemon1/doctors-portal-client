@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
 import Loading from '../Shared/Loading';
 import { Link, useNavigate } from 'react-router-dom';
+import useToken from '../../Hooks/useToken';
 
 const SignUp = () => {
 
@@ -23,13 +24,12 @@ const SignUp = () => {
 
     const navigate = useNavigate();
 
+    const [token] = useToken(guser || user);
+
     const onSubmit = async data => {
         await createUserWithEmailAndPassword(data.email, data.password);
         await updateProfile({ displayName: data.name });
         console.log('Updated done');
-        navigate('/appointment');
-
-
     }
 
     let signInErrorMessage;
@@ -41,8 +41,8 @@ const SignUp = () => {
     if (loading || gloading || updating) {
         return <Loading></Loading>
     }
-    if (guser || user) {
-        console.log(guser);
+    if (token) {
+        navigate('/appointment');
     }
 
 
